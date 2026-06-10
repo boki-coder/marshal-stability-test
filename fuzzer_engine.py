@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
+# flake8: noqa: C901
 # -*- coding: utf-8 -*-
+
 """
 fuzzer_engine.py
 角色2: 复杂结构与模糊测试（黑盒）
@@ -15,7 +17,6 @@ fuzzer_engine.py
 
 import marshal
 import random
-import sys
 import time
 from typing import Any, List, Tuple
 
@@ -120,7 +121,7 @@ def run_fuzzer(iterations: int = 10000, log_file: str = "fuzzing_crashes.log"):
         for i in range(iterations):
             obj = generate_random_object()
             try:
-                data = marshal.dumps(obj)
+                marshal.dumps(obj)
                 success_count += 1
             except Exception as e:
                 crash_count += 1
