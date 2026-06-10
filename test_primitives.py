@@ -2,6 +2,7 @@
 test_primitives.py - 基础类型边界值黑盒测试
 使用 pytest 框架，验证 marshal.dumps 对基础类型的序列化确定性。
 """
+
 import sys
 import hashlib
 import marshal
@@ -29,7 +30,7 @@ class TestIntBoundaries:
         assert get_hash(val) == get_hash(val)
 
     def test_int_64bit_min(self):
-        val = -2**63
+        val = -(2**63)
         assert get_hash(val) == get_hash(val)
 
     def test_int_large_positive(self):
@@ -37,7 +38,7 @@ class TestIntBoundaries:
         assert get_hash(val) == get_hash(val)
 
     def test_int_large_negative(self):
-        val = -2**100
+        val = -(2**100)
         assert get_hash(val) == get_hash(val)
 
 
@@ -52,23 +53,23 @@ class TestFloatBoundaries:
         assert get_hash(val) == get_hash(val)
 
     def test_infinity(self):
-        val = float('inf')
+        val = float("inf")
         assert get_hash(val) == get_hash(val)
 
     def test_negative_infinity(self):
-        val = -float('inf')
+        val = -float("inf")
         assert get_hash(val) == get_hash(val)
 
     def test_nan_same_object(self):
         # 同一个 nan 对象两次序列化应一致
-        val = float('nan')
+        val = float("nan")
         assert get_hash(val) == get_hash(val)
 
     def test_nan_different_objects(self):
         # 注意：不同 nan 对象可能具有不同位模式，
         # 这里记录为潜在缺陷，仅观察不强制断言
-        val1 = float('nan')
-        val2 = float('nan')
+        val1 = float("nan")
+        val2 = float("nan")
         h1 = get_hash(val1)
         h2 = get_hash(val2)
         if h1 != h2:
@@ -93,8 +94,9 @@ class TestFloatBoundaries:
 
     def test_pi(self):
         assert get_hash(3.141592653589793) == get_hash(3.141592653589793)
+
     def test_inf_symmetry(self):
-        val = [float('inf'), -float('inf')]
+        val = [float("inf"), -float("inf")]
         assert get_hash(val) == get_hash(val)
 
 
@@ -164,8 +166,9 @@ class TestBytesBoundaries:
     def test_all_byte_values(self):
         val = bytes(range(256))
         assert get_hash(val) == get_hash(val)
+
     def test_large_bytes(self):
-        val = b'\x00' * 100000
+        val = b"\x00" * 100000
         assert get_hash(val) == get_hash(val)
 
 
@@ -178,7 +181,7 @@ class TestNone:
 # ====================== 混合基础类型 ==========================
 class TestMixedPrimitives:
     def test_list_of_primitives(self):
-        val = [0, 1.0, -float('inf'), True, None, "test", b"\x00"]
+        val = [0, 1.0, -float("inf"), True, None, "test", b"\x00"]
         assert get_hash(val) == get_hash(val)
 
     def test_dict_of_primitives(self):
