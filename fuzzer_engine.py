@@ -20,20 +20,22 @@ import time
 from typing import Any, List, Tuple
 
 # ---------- 随机对象生成器配置 ----------
-RANDOM_SEED = 42               # 固定种子，确保可复现
-MAX_DEPTH = 6                  # 最大嵌套深度
-MAX_CONTAINER_SIZE = 20        # 单个容器最大元素数量（避免生成过大的对象）
+RANDOM_SEED = 42  # 固定种子，确保可复现
+MAX_DEPTH = 6  # 最大嵌套深度
+MAX_CONTAINER_SIZE = 20  # 单个容器最大元素数量（避免生成过大的对象）
 
 # 基本类型池（包含极端浮点数）
 PRIMITIVE_GENERATORS = [
-    lambda: random.randint(-10**6, 10**6),                     # 普通整数
-    lambda: random.randint(-2**63, 2**63 - 1),                 # 64位边界整数
-    lambda: random.choice([0, 1, -1, 2**31, -2**31]),          # 特殊整数值
-    lambda: random.choice([0.0, -0.0, float('inf'), float('-inf'), float('nan')]),
-    lambda: random.uniform(-1e300, 1e300),                     # 一般浮点数
+    lambda: random.randint(-(10**6), 10**6),  # 普通整数
+    lambda: random.randint(-(2**63), 2**63 - 1),  # 64位边界整数
+    lambda: random.choice([0, 1, -1, 2**31, -(2**31)]),  # 特殊整数值
+    lambda: random.choice([0.0, -0.0, float("inf"), float("-inf"), float("nan")]),
+    lambda: random.uniform(-1e300, 1e300),  # 一般浮点数
     lambda: random.choice([True, False]),
-    lambda: ''.join(random.choices('abc\t\n\r\x00', k=random.randint(0, 10))),  # 含控制字符
-    lambda: bytes(random.randint(0, 50)),                      # 随机字节串
+    lambda: "".join(
+        random.choices("abc\t\n\r\x00", k=random.randint(0, 10))
+    ),  # 含控制字符
+    lambda: bytes(random.randint(0, 50)),  # 随机字节串
     lambda: None,
 ]
 
@@ -48,25 +50,27 @@ def generate_random_object(current_depth: int = 0) -> Any:
         return random.choice(PRIMITIVE_GENERATORS)()
 
     # 容器类型
-    container_type = random.choice(['list', 'dict', 'set', 'tuple'])
+    container_type = random.choice(["list", "dict", "set", "tuple"])
     size = random.randint(0, MAX_CONTAINER_SIZE)
     items = []
 
-    if container_type == 'list':
+    if container_type == "list":
         for _ in range(size):
             items.append(generate_random_object(current_depth + 1))
         return items
 
-    elif container_type == 'tuple':
+    elif container_type == "tuple":
         for _ in range(size):
             items.append(generate_random_object(current_depth + 1))
         return tuple(items)
 
-    elif container_type == 'set':
+    elif container_type == "set":
         # set 要求元素可哈希，限制为不可变类型
         for _ in range(size):
             elem = generate_random_object(current_depth + 1)
-            while not isinstance(elem, (int, float, bool, str, bytes, tuple, type(None))):
+            while not isinstance(
+                elem, (int, float, bool, str, bytes, tuple, type(None))
+            ):
                 elem = generate_random_object(current_depth + 1)
             items.append(elem)
         return set(items)
@@ -75,7 +79,9 @@ def generate_random_object(current_depth: int = 0) -> Any:
         for _ in range(size):
             # key 必须可哈希
             key = generate_random_object(current_depth + 1)
-            while not isinstance(key, (int, float, bool, str, bytes, tuple, type(None))):
+            while not isinstance(
+                key, (int, float, bool, str, bytes, tuple, type(None))
+            ):
                 key = generate_random_object(current_depth + 1)
             value = generate_random_object(current_depth + 1)
             items.append((key, value))
@@ -130,7 +136,9 @@ def run_fuzzer(iterations: int = 10000, log_file: str = "fuzzing_crashes.log"):
             if (i + 1) % 1000 == 0:
                 print(f"Progress: {i+1}/{iterations}, crashes so far: {crash_count}")
 
-    print(f"\nFuzzing finished. Total: {iterations}, Success: {success_count}, Crashes: {crash_count}")
+    print(
+        f"\nFuzzing finished. Total: {iterations}, Success: {success_count}, Crashes: {crash_count}"
+    )
     print(f"Crash log saved to {log_file}")
 
 
@@ -172,13 +180,17 @@ def test_circular_refs():
         try:
             marshal.dumps(obj)
             # 如果没有抛异常，测试失败
-            raise AssertionError(f"Expected exception for {desc}, but marshal.dumps succeeded")
+            raise AssertionError(
+                f"Expected exception for {desc}, but marshal.dumps succeeded"
+            )
         except (ValueError, RecursionError) as e:
             # 预期异常，测试通过
             print(f"✅ {desc} -> correctly raised {type(e).__name__}: {e}")
         except Exception as e:
             # 其他异常也算失败（但通常不会发生）
-            raise AssertionError(f"Unexpected exception {type(e).__name__} for {desc}: {e}")
+            raise AssertionError(
+                f"Unexpected exception {type(e).__name__} for {desc}: {e}"
+            )
 
 
 def test_fuzzer_smoke():
@@ -199,9 +211,12 @@ def test_fuzzer_smoke():
 # ---------- 命令行入口 ----------
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser(description="marshal 模糊测试引擎")
     parser.add_argument("-n", "--iterations", type=int, default=10000, help="测试次数")
-    parser.add_argument("-l", "--log", type=str, default="fuzzing_crashes.log", help="日志文件路径")
+    parser.add_argument(
+        "-l", "--log", type=str, default="fuzzing_crashes.log", help="日志文件路径"
+    )
     args = parser.parse_args()
 
     run_fuzzer(iterations=args.iterations, log_file=args.log)
