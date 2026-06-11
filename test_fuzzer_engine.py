@@ -12,9 +12,9 @@ MAX_DEPTH = 6
 MAX_CONTAINER_SIZE = 20
 
 PRIMITIVE_GENERATORS = [
-    lambda: random.randint(-(10 ** 6), 10 ** 6),
-    lambda: random.randint(-(2 ** 63), 2 ** 63 - 1),
-    lambda: random.choice([0, 1, -1, 2 ** 31, -(2 ** 31)]),
+    lambda: random.randint(-(10**6), 10**6),
+    lambda: random.randint(-(2**63), 2**63 - 1),
+    lambda: random.choice([0, 1, -1, 2**31, -(2**31)]),
     lambda: random.choice([0.0, -0.0, float("inf"), float("-inf"), float("nan")]),
     lambda: random.uniform(-1e300, 1e300),
     lambda: random.choice([True, False]),
@@ -44,7 +44,9 @@ def generate_random_object(current_depth: int = 0) -> Any:
 
     elif container_type == "set":
         for _ in range(size):
-            while True:  # 修复Bug：使用真实的 hash() 判断，解决元组嵌套集合导致崩溃的问题
+            while (
+                True
+            ):  # 修复Bug：使用真实的 hash() 判断，解决元组嵌套集合导致崩溃的问题
                 elem = generate_random_object(current_depth + 1)
                 try:
                     hash(elem)
